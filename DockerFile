@@ -1,18 +1,19 @@
-# Use the official Node.js LTS image
-FROM node:20-alpine
+# Use Node.js for Windows Server Core
+FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
-# Set working directory in container
+# Install Node.js manually
+RUN powershell -Command `
+    Invoke-WebRequest https://nodejs.org/dist/v20.12.2/node-v20.12.2-x64.msi -OutFile nodejs.msi; `
+    Start-Process msiexec.exe -ArgumentList '/quiet', '/qn', '/i', 'nodejs.msi' -Wait; `
+    Remove-Item -Force nodejs.msi
+
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Copy the rest of your application code
 COPY . .
 
-# Expose the port your app runs on (change if needed)
 EXPOSE 3000
 
-# Start the app (update this if your entry point is different)
 CMD ["node", "app.js"]
